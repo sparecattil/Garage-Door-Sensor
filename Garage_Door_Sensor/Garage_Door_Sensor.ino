@@ -3,7 +3,8 @@
 // revised R. Mudumbai, 2020 & 2024
 
 
-
+// Transmitter Frequency: 427Hz
+// Duty Cycle: 66% (Possibly 33%)
 // The following defines are used for setting and clearing register bits
 // on the Arduino processor. Low-level stuff: leave alone.
 
@@ -15,23 +16,48 @@
 #define sbi(sfr, bit) (_SFR_BYTE(sfr) |= _BV(bit))
 #endif
 
-int analogPin = A0;     // Specify analog input pin. Make sure to keep between 0 and 5V.
-int LED = 12;           // Specify output analog pin with indicator LED 
+int analogPin = A5;     // Specify analog input pin. Make sure to keep between 0 and 5V.
+int LED = A2;           // Specify output analog pin with indicator LED 
 
    // num and den are the numerator and denominator coeffs of a digital frequency-selective filter
    // designed for a sample rate Fs=3000 HZ
   
 
-const int n = 7;   // number of past input and output samples to buffer; change this to match order of your filter
+const int n = 13;   // number of past input and output samples to buffer; change this to match order of your filter
 int m = 10; // number of past outputs to average for hysteresis
 
-float den[] = {1.0000,   0.00, 	0.00,	0.00,	0.00,	0.00,	0.00}; //Denominator Coefficients
-float num[] = {0.0058,   0.00,   -0.015,         0.00,    0.015,    0.00,   -0.0058}; //Numerator Coefficients
+float den[] = {1,                                        
+              -2.614171664537536798889050260186195373535,
+                8.013955907797999600461480440571904182434,
+              -12.931938688374843948736270249355584383011,
+              21.557663388770151868811808526515960693359,
+              -23.935521421990692658710031537339091300964,
+              26.69762369206032559532104642130434513092,
+              -20.817380238459783470261754700914025306702,
+              16.307560320653106344934712979011237621307,
+              -8.505643787824583412771062285173684358597,
+                4.584031314493522302200290141627192497253,
+              -1.299340787409902331361877259041648358107,
+                0.432271862547480234528762821355485357344}; //Denominator Coefficients
+
+float num[] = { 0.000001084068777143578069432818672401808, 
+                0,                                         
+                -0.000006504412662861468416596912034410849, 
+                0,                                         
+                0.00001626103165715367358259112184892814,  
+                0,                                         
+                -0.000021681375542871564776788162465237519, 
+                0,                                         
+                0.00001626103165715367358259112184892814, 
+                0,                                         
+                -0.000006504412662861468416596912034410849, 
+                0,                                         
+                0.000001084068777143578069432818672401808 }; //Numerator Coefficients
 
 
 float x[n],y[n],yn, s[10];     // Space to hold previous samples and outputs; n'th order filter will require upto n samples buffered
 
-float threshold_val = 0.2; // Threshold value. Anything higher than the threshold will turn the LED off, anything lower will turn the LED on
+float threshold_val = 2.2; // Threshold value. Anything higher than the threshold will turn the LED off, anything lower will turn the LED on
 
 // time between samples Ts = 1/Fs. If Fs = 3000 Hz, Ts=333 us
 int Ts = 333;

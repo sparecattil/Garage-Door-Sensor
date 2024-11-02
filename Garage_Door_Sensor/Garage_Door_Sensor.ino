@@ -55,9 +55,9 @@ float num[] = { 0.000001084068777143578069432818672401808,
                 0.000001084068777143578069432818672401808 }; //Numerator Coefficients
 
 
-float x[n],y[n],yn, s[10];     // Space to hold previous samples and outputs; n'th order filter will require upto n samples buffered
+float x[n], y[n], outputYn, s[10];     // Space to hold previous samples and outputs; n'th order filter will require upto n samples buffered
 
-float threshold_val = 2.2; // Threshold value. Anything higher than the threshold will turn the LED off, anything lower will turn the LED on
+float threshold_val = 0.2; // Threshold value. Anything higher than the threshold will turn the LED off, anything lower will turn the LED on
 
 // time between samples Ts = 1/Fs. If Fs = 3000 Hz, Ts=333 us
 int Ts = 333;
@@ -67,9 +67,9 @@ void setup()
    Serial.begin(1200);
    int i;
 
-   sbi(ADCSRA,ADPS2);     // Next three lines make the ADC run faster
-   cbi(ADCSRA,ADPS1);
-   cbi(ADCSRA,ADPS0);
+   //sbi(ADCSRA,ADPS2);     // Next three lines make the ADC run faster
+   //cbi(ADCSRA,ADPS1);
+   //cbi(ADCSRA,ADPS0);
 
    pinMode(LED,OUTPUT);   // Makes the LED pin an output
 
@@ -78,7 +78,7 @@ void setup()
 
    for(i = 0; i<m; i++)
     s[i] = 0;
-   yn = 0;
+   outputYn = 0;
 }
 
 
@@ -108,22 +108,22 @@ void loop()
 
       x[0] = val*(5.0/1023.0)-2.5;  // Scale to match ADC resolution and range
 
-      yn = num[0] * x[0];
+      outputYn = num[0] * x[0];
       
       for(i=1;i<n;i++)             // Incorporate previous outputs (y[n])
-         yn = yn - den[i]* y[i] + num[i] * x[i];          
+         outputYn = outputYn - den[i]* y[i] + num[i] * x[i];          
          
 
-       y[0] = yn;                  // New output
+       y[0] = outputYn;                  // New output
 
-      //  The variable yn is the output of the filter at this time step.
+      //  The variable outputYn is the output of the filter at this time step.
       //  Now we can use it for its intended purpose:
       //       - Apply theshold
       //       - Apply hysteresis
       //       - What to do when the beam is interrupted, turn on a buzzer, send SMS alert.
       //       - etc.
 
-      s[0] = abs(2*yn);  // Absolute value of the filter output.
+      s[0] = abs(2*outputYn);  // Absolute value of the filter output.
 
       // SAMPLE Hystersis: Take the max of the past 10 samples and compare that with the threshold
       float maxs = 0;
@@ -144,10 +144,12 @@ void loop()
         if(maxs < threshold_val)
         {
           digitalWrite(LED, HIGH);
+          Serial.println("LED HIGH");
         }
         else
         {
           digitalWrite(LED, LOW);
+          Serial.println("LED LOW");
         }
       }
       

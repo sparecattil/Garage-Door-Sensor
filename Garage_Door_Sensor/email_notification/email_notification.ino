@@ -19,6 +19,8 @@ bool signupOK = false; // Signed into firebase check
 int pinNumber = 5;
 int pinStatus;
 
+bool emailLock = false;
+
 void setup() {
   Serial.begin(115200);
 
@@ -54,19 +56,29 @@ void setup() {
   
   Firebase.reconnectWiFi(true); // Configures Firebase to reconnect to WIFI when connection is lost
 
+  if (Firebase.ready() && signupOK) {
+    sendToFirebase("Send_Email", false);
+  }
+
 }
 
 void loop() {
   pinStatus = digitalRead(pinNumber); // Read the status of the pin (HIGH or LOW)
 
   ////--------Sending to Firebase--------////
-  if (Firebase.ready() && signupOK && (millis() - sendDataPrevMillis > 1000 || sendDataPrevMillis == 0)) {
-    if (pinStatus == HIGH) {
-      Serial.println("Pin is HIGH");
-      sendToFirebase("Send_Email", true);
-    } 
-    else {
+  // && (millis() - sendDataPrevMillis > 0 || sendDataPrevMillis == 0)
+  if (Firebase.ready() && signupOK) {
+    if (pinStatus == LOW && !emailLock) {
+      Serial.println();
       Serial.println("Pin is LOW");
+      Serial.println(pinStatus);
+      sendToFirebase("Send_Email", true);
+      emailLock = true;
+    } 
+    else if (pinStatus == HIGH) {
+      Serial.println();
+      Serial.println("Pin is HIGH");
+      emailLock = false;
       // Do nothing
     }
   }

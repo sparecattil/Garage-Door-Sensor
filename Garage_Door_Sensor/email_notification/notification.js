@@ -62,8 +62,9 @@ function messageTime() {
     else {
         hoursUpdated = hours % 12;
     }
-
+    
     // If digit is single then add padding 0 to begenning else keep
+    hoursUpdated = hoursUpdated.toString().padStart(2, '0');
     let minutesUpdated = minutes.toString().padStart(2, '0');
     let AMorPM;
 

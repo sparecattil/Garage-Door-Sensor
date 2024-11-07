@@ -1,3 +1,15 @@
+///////////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////<Garage Door Sensor>/////////////////////////////////
+// Group Members: Sebastian Parecatti, Shiv Patel, John Finch, Logan Schimanski
+// Description: 
+// Contains software implementations for the email notification system via the ESP32
+// microcontroller, the ESP 32 will continously read the On/Off status of the receiver's
+// LED and send an email notification when the LED is turn on, The email is sent by
+// connecting to Firebase and sending a boolean status which will be read by a Node.js 
+// file, "notification.js"
+//////////////////////////////////<Garage Door Sensor>/////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////////////
+
 #include <Arduino.h> 
 #include <WiFi.h>
 #include <Firebase_ESP_Client.h>
@@ -16,10 +28,10 @@ FirebaseConfig config; // Used to set the configure properties of the connection
 unsigned long sendDataPrevMillis = 0; // Used to find the time elapsed since the data was last sent to Firebase
 bool signupOK = false; // Signed into firebase check
 
-int pinNumber = 5;
-int pinStatus;
+int pinNumber = 5; // Pin to read from LED
+int pinStatus; // Current status of the LED pin
 
-bool emailLock = false;
+bool emailLock = false; // Locks email functionality to prevent multiple successive email messages on a single pin status change
 
 void setup() {
   Serial.begin(115200);
@@ -56,8 +68,9 @@ void setup() {
   
   Firebase.reconnectWiFi(true); // Configures Firebase to reconnect to WIFI when connection is lost
 
+  // Checking if Firebase is ready
   if (Firebase.ready() && signupOK) {
-    sendToFirebase("Send_Email", false);
+    sendToFirebase("Send_Email", false); // Initializing boolean status variable on Firebase
   }
 
 }
@@ -66,20 +79,21 @@ void loop() {
   pinStatus = digitalRead(pinNumber); // Read the status of the pin (HIGH or LOW)
 
   ////--------Sending to Firebase--------////
-  // && (millis() - sendDataPrevMillis > 0 || sendDataPrevMillis == 0)
+  // Checking if Firebase is ready
   if (Firebase.ready() && signupOK) {
+    // Checking if LED is on and that the status of the LED has changed
     if (pinStatus == LOW && !emailLock) {
       Serial.println();
       Serial.println("Pin is LOW");
       Serial.println(pinStatus);
-      sendToFirebase("Send_Email", true);
-      emailLock = true;
-    } 
+      sendToFirebase("Send_Email", true); // Sending boolean status for email notification to Firebase
+      emailLock = true; // Setting the email lock
+    }
+    // Checking if the LED is off
     else if (pinStatus == HIGH) {
       Serial.println();
       Serial.println("Pin is HIGH");
-      emailLock = false;
-      // Do nothing
+      emailLock = false; // Disabling email lock since the status of the LED has changed
     }
   }
 }
@@ -87,7 +101,9 @@ void loop() {
 ///////////////////////////////////////////////////////////////////////////////////////
 // Method : sendToFirebase(String path, float value)
 // Inputs : String path - Location path in Firebase which is written to
-//          bool value - true - send email, false - do not send email
+//          bool value - Status to send an email
+//                       true - send an email
+//                       false - do not send email
 // Outputs: None
 ///////////////////////////////////////////////////////////////////////////////////////
 void sendToFirebase(String path, bool value) {

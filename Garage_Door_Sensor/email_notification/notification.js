@@ -1,3 +1,14 @@
+/////////////////////////////////////////////////////////////////////////////////////////
+// File Name: notification.js
+// Date: 11/07/2024
+// Team: Intuition (Team 3)
+// Description: The following file will read from firebase if a email must be sent to 
+//              alert the user that the sensor has been tripped. If so the email will be 
+//              sent containing the time and day the sensor was tripped. Once a email is
+//              sent the firebase value is set back to fasle until the sensor is tripped 
+//              again.
+/////////////////////////////////////////////////////////////////////////////////////////
+
 // Import Firebase Initialization, Firebase Commands, and Node Mailer
 const { initializeApp } = require('firebase/app'); 
 const { getDatabase, ref, onValue, set } = require('firebase/database');

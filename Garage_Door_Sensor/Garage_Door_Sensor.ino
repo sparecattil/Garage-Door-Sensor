@@ -42,6 +42,17 @@ float num[] = {0.086364027013761016093873479348985711113,
 
 float x[n],y[n],yn, s[10];     // Space to hold previous samples and outputs; n'th order filter will require upto n samples buffered
 
+// THRESHOLD_VAL
+// The following value of 0.05 was used upon multiple tests. 
+// Upon making a working filter we noticed the maxs values 
+// being printed to the serial monitor exceeded that of 0.2. 
+// As we decreased the threshold value the length at witch 
+// the reciever and transmitter could operate exceed by a 
+// couple inches. In this case we decided to drop the 
+// threshold value to 0.05 because all necessary length 
+// requirements were easily achieved at a stable rate.
+// If the value was ot be dropped any lower this would cause 
+// inconsistency in the system.
 float threshold_val = 0.05; // Threshold value. Anything higher than the threshold will turn the LED off, anything lower will turn the LED on
 
 // Time between samples Ts = 1/Fs. If Fs = 3000 Hz, Ts=333 us; In this case Fs = 1000 Hz
